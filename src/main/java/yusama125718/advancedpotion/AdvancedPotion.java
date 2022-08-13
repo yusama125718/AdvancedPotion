@@ -1,16 +1,15 @@
 package yusama125718.advancedpotion;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.*;
+
+import static yusama125718.advancedpotion.Function.reloadconfig;
 
 public final class AdvancedPotion extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
 
@@ -26,6 +25,7 @@ public final class AdvancedPotion extends JavaPlugin implements Listener, Comman
         getCommand("advpot").setExecutor(new Command());
         new Event(this);
         potp = this;
+        reloadconfig();
         getServer().getPluginManager().registerEvents(this, this);      //Event用
     }
 }

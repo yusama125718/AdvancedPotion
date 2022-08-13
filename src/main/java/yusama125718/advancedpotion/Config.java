@@ -36,11 +36,11 @@ public class Config {
 
     public static PotionRecipe getConfig(YamlConfiguration config){
         if (!checknull(config)) {
-            Bukkit.broadcast("[AdvancedPotion]" + config.getCurrentPath() + "の読み込みに失敗しました","advpot.op");
+            Bukkit.broadcast("§9§l[AdvancedPotion] §r" + config.getName() + "の読み込みに失敗しました","advpot.op");
             return null;
         }
         PotionIngredient ingre = new PotionIngredient(Material.getMaterial(Objects.requireNonNull(config.getString("ingredient.material"))), config.getInt("ingredient.cmd"), config.getString("ingredient.name"));
-        PotionMaterial potmaterial = new PotionMaterial(Material.getMaterial(Objects.requireNonNull(config.getString("material.material"))),config.getInt("material.cmd"),config.getString("material.name"));
+        PotionMaterial potmaterial = new PotionMaterial(config.getString("material.material"),config.getInt("material.cmd"),config.getString("material.name"),config.getBoolean("material.extended"),config.getBoolean("material.upgraded"));
         List<PotionItem> item = new ArrayList<PotionItem>();
         for (int i = 1;i < 3;i++){
             if (config.getConfigurationSection("result."+ i +"st") == null) return new PotionRecipe(config.getString("name"),ingre,potmaterial,item);

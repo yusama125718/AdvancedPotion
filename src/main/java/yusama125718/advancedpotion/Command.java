@@ -13,7 +13,7 @@ import java.util.List;
 
 import static java.lang.Integer.parseInt;
 import static yusama125718.advancedpotion.AdvancedPotion.*;
-import static yusama125718.advancedpotion.Data.*;
+import static yusama125718.advancedpotion.GUI.*;
 
 public class Command implements CommandExecutor, TabCompleter {
     @Override
@@ -27,14 +27,19 @@ public class Command implements CommandExecutor, TabCompleter {
             case 1:
                 switch (args[0]) {
                     case "help":        //help
-                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect on/off §r保護をon/offします");
-                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect add [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を許可します");
-                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect delete [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を禁止します");
-                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect check §r手に持っているアイテムの許可されているカスタムモデルデータを確認します");
-                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
+                        if (sender.hasPermission("advpot.op")) {
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect on/off §r保護をon/offします");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect add [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を許可します");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect delete [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を禁止します");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect check §r手に持っているアイテムの許可されているカスタムモデルデータを確認します");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
+                        }
+                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe §rレシピを確認します");
                         return true;
 
                     case "recipe":
+                        RecipeList((Player) sender);
+                        return true;
 
                     default:
                         sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
@@ -44,6 +49,10 @@ public class Command implements CommandExecutor, TabCompleter {
             case 2:
                 switch (args[0]){
                     case "protect":
+                        if (!sender.hasPermission("advpot.op")) {         //permission確認
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
+                            return true;
+                        }
                         switch (args[1]){
 
                             case "on":      //保護on
@@ -118,6 +127,10 @@ public class Command implements CommandExecutor, TabCompleter {
             case 3:
                 switch (args[0]){
                     case "protect":
+                        if (!sender.hasPermission("advpot.op")) {         //permission確認
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
+                            return true;
+                        }
                         if (args[1].equals("add")){     //保護追加処理
                             Material inhand = ((Player) sender).getInventory().getItemInMainHand().getType();
                             if (!allowitem.containsKey(inhand)) {
