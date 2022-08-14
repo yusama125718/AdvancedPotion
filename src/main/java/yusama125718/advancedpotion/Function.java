@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -124,5 +125,24 @@ public class Function {
             return false;
         }
         return true;
+    }
+
+    public static ItemStack getItem(Material mate,Integer amount,String name,Integer cmd){
+        ItemStack item = new ItemStack(mate,amount);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text(name));
+        meta.setCustomModelData(cmd);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static ItemStack getItem(Material mate,Integer amount,String name,Integer cmd,PotionType type,boolean extended,boolean upgraded){
+        ItemStack item = new ItemStack(mate,amount);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text(name));
+        meta.setCustomModelData(cmd);
+        ((PotionMeta) meta).setBasePotionData(new PotionData(type,extended,upgraded));
+        item.setItemMeta(meta);
+        return item;
     }
 }

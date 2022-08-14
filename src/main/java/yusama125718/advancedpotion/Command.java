@@ -38,7 +38,7 @@ public class Command implements CommandExecutor, TabCompleter {
                         return true;
 
                     case "recipe":
-                        RecipeList((Player) sender);
+                        RecipeList((Player) sender,1);
                         return true;
 
                     default:
