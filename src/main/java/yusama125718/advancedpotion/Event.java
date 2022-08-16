@@ -12,6 +12,10 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static org.bukkit.Material.*;
@@ -135,32 +139,61 @@ public class Event implements Listener{
     }
 
     @EventHandler
-    public void InventoryClick(InventoryClickEvent e){
-        if (e.getView().getTitle().equals("[AdvPot]Add Recipe")){
-            if (e.getWhoClicked().hasPermission("advpot.op")) return;
-            if (e.getCurrentItem() == null) return;
-            if (e.getCurrentItem().getType() == BLACK_STAINED_GLASS_PANE || e.getCurrentItem().getType() == WHITE_STAINED_GLASS_PANE ){
-                e.setCancelled(true);
-                return;
-            }
-            if (e.getCurrentItem().getType() != RED_STAINED_GLASS_PANE || e.getRawSlot() != 41) return;
-            Inventory inv = e.getInventory();
-            if (inv.getItem(12) == null || inv.getItem(24) == null || inv.getItem(30) == null) {
-                e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §cアイテムが不足しています");
-                e.setCancelled(true);
-                return;
-            }
-            if (!checkingredient(inv.getItem(12).getType())){
-                e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §c材料(上)が不正です");
-                e.setCancelled(true);
-                return;
-            }
-            if (inv.getItem(30).getType() != POTION){
-                e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §c材料(下)が不正です");
-                e.setCancelled(true);
-                return;
-            }
-            //ここからまだ製作中
+    public void AddGUIClick(InventoryClickEvent e){     //レシピ追加用
+        if (!e.getView().getTitle().equals("[AdvPot]Add Recipe")) return;
+        if (e.getWhoClicked().hasPermission("advpot.op")) return;
+        if (e.getCurrentItem() == null) return;
+        if (e.getCurrentItem().getType() == BLACK_STAINED_GLASS_PANE || e.getCurrentItem().getType() == WHITE_STAINED_GLASS_PANE ){
+            e.setCancelled(true);
+            return;
         }
+        if (e.getCurrentItem().getType() != RED_STAINED_GLASS_PANE || e.getRawSlot() != 41) return;
+        Inventory inv = e.getInventory();
+        if (inv.getItem(12) == null || inv.getItem(24) == null || inv.getItem(30) == null) {
+            e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §cアイテムが不足しています");
+            e.setCancelled(true);
+            return;
+        }
+        if (!checkingredient(inv.getItem(12).getType())){
+            e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §c材料(上)が不正です");
+            e.setCancelled(true);
+            return;
+        }
+        if (inv.getItem(30).getType() != POTION){
+            e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §c材料(下)が不正です");
+            e.setCancelled(true);
+            return;
+        }
+        if (addname == null || !addname.containsKey(e.getWhoClicked())){
+            e.setCancelled(true);
+            return;
+        }
+        int cmd = 0;
+        if (inv.getItem(12).getItemMeta().hasCustomModelData()) cmd = 0;
+        else cmd = inv.getItem(12).getItemMeta().getCustomModelData();
+        PotionIngredient ingre = new PotionIngredient(inv.getItem(12).getType(),cmd,inv.getItem(12).getItemMeta().getDisplayName());
+        if (inv.getItem(30).getItemMeta().hasCustomModelData()) cmd = 0;
+        else cmd = inv.getItem(30).getItemMeta().getCustomModelData();
+        PotionData data = ((PotionMeta) inv.getItem(30).getItemMeta()).getBasePotionData();
+        PotionMaterial mate = new PotionMaterial(data.getType().toString(),cmd,inv.getItem(30).getItemMeta().getDisplayName(),data.isExtended(), data.isUpgraded());
+        List<PotionItem> addlist = new ArrayList<>();
+        if (inv.getItem(24).getItemMeta().hasCustomModelData()) cmd = 0;
+        else cmd = inv.getItem(24).getItemMeta().getCustomModelData();
+        addlist.add(new PotionItem(inv.getItem(24).getType(),cmd,inv.getItem(24).getAmount(),inv.getItem(24).getI18NDisplayName()));
+        if (inv.getItem(25) != null){
+            if (inv.getItem(25).getItemMeta().hasCustomModelData()) cmd = 0;
+            else cmd = inv.getItem(25).getItemMeta().getCustomModelData();
+            addlist.add(new PotionItem(inv.getItem(25).getType(),cmd,inv.getItem(25).getAmount(),inv.getItem(25).getI18NDisplayName()));
+        }
+        if (inv.getItem(26) != null){
+            if (inv.getItem(26).getItemMeta().hasCustomModelData()) cmd = 0;
+            else cmd = inv.getItem(26).getItemMeta().getCustomModelData();
+            addlist.add(new PotionItem(inv.getItem(26).getType(),cmd,inv.getItem(26).getAmount(),inv.getItem(26).getI18NDisplayName()));
+        }
+        File folder = new File(configfile.getAbsolutePath() + File.separator + addname.get(e.getWhoClicked()) + ".yml");
+        recipe.add(new PotionRecipe(addname.get(e.getWhoClicked()),ingre,mate,addlist));
+        addname.remove(e.getWhoClicked());
+        e.getInventory().close();
+        e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §r追加しました");
     }
 }

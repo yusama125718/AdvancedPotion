@@ -15,7 +15,8 @@ import static yusama125718.advancedpotion.Data.*;
 import static yusama125718.advancedpotion.Function.*;
 
 public class Config {
-    static File folder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "recipes");
+    private static File folder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "recipes");
+    private static File removefolder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "removefiles");
 
     public static void RoadFile(){
         if (potp.getDataFolder().listFiles() != null){
@@ -24,13 +25,23 @@ public class Config {
                     configfile = file;
                     return;
                 }
+                if (file.getName().equals("removefiles")) {
+                    configfile = file;
+                    return;
+                }
             }
         }
         if (folder.mkdir()) {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §rフォルダを作成しました", "advpot.op");
+            Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダを作成しました", "advpot.op");
             configfile = folder;
         } else {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §rフォルダの作成に失敗しました", "advpot.op");
+            Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダの作成に失敗しました", "advpot.op");
+        }
+        if (removefolder.mkdir()) {
+            Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダを作成しました", "advpot.op");
+            removefile = removefolder;
+        } else {
+            Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダの作成に失敗しました", "advpot.op");
         }
     }
 

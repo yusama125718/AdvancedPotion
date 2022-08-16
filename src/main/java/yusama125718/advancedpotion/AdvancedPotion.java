@@ -3,6 +3,7 @@ package yusama125718.advancedpotion;
 import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,6 +20,8 @@ public final class AdvancedPotion extends JavaPlugin implements Listener, Comman
     public static boolean protectoperation;
     public static ArrayList<Data.PotionRecipe> recipe = new ArrayList<>();
     public static File configfile;
+    public static File removefile;
+    public static HashMap<Player,String> addname = new HashMap<>();
 
     @Override
     public void onEnable() {    //起動処理

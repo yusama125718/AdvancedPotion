@@ -7,6 +7,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -203,6 +206,44 @@ public class Command implements CommandExecutor, TabCompleter {
                         }
 
                     case "recipe":
+                        switch (args[1]){
+                            case "add":
+                                addname.put((Player) sender,args[2]);
+                                addrecipeGUI((Player) sender);
+                                return true;
+
+                            case "remove":
+                                boolean check = false;
+                                Data.PotionRecipe target;
+                                for (Data.PotionRecipe data : recipe) {
+                                    if (data.name == args[2]) {
+                                        check = true;
+                                        target = data;
+                                        break;
+                                    }
+                                }
+                                if (!check){
+                                    sender.sendMessage("§9§l[AdvancedPotion] §cその名前のレシピは存在しません");
+                                    return true;
+                                }
+                                for (File file : configfile){
+                                    if (!file.getName().equals(args[2])) continue;
+                                    try{
+                                        Files.move(removefile.getAbsoluteFile().toPath(), file.getAbsoluteFile().toPath());
+                                    }catch(IOException e){
+                                        System.out.println(e);
+                                        sender.sendMessage("§9§l[AdvancedPotion] §cファイルの移動に失敗しました");
+                                        return true;
+                                    }
+                                    recipe.remove(target);
+                                    sender.sendMessage("§9§l[AdvancedPotion] §r削除しました(ファイルは専用ディレクトリで保管されています)");
+                                }
+                                return true;
+
+                            default:
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
+                                return true;
+                        }
 
                     default:
                         sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
