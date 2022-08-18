@@ -57,6 +57,8 @@ public class Function {
         allowitem.put(Material.SUGAR,sugar);
         List<Integer> turtle = potp.getConfig().getIntegerList("TURTLE_HELMET");
         allowitem.put(Material.TURTLE_HELMET,turtle);
+        List<Integer> potion = potp.getConfig().getIntegerList("POTION");
+        allowitem.put(Material.POTION,potion);
         recipeoperation = potp.getConfig().getBoolean("recipe");
         protectoperation = potp.getConfig().getBoolean("protect");
         Bukkit.broadcast("§9§l[AdvancedPotion] §rリロード完了", "advpot.op");
@@ -64,7 +66,7 @@ public class Function {
     }
 
     public static boolean checkingredient(Material mate){
-        return mate == BLAZE_POWDER || mate == FERMENTED_SPIDER_EYE || mate == GHAST_TEAR || mate == GLISTERING_MELON_SLICE || mate == GOLDEN_CARROT || mate == GUNPOWDER || mate == MAGMA_CREAM || mate == NETHER_WART || mate == PHANTOM_MEMBRANE || mate == PUFFERFISH || mate == RABBIT_FOOT || mate == SPIDER_EYE || mate == SUGAR || mate == TURTLE_HELMET;
+        return mate == BLAZE_POWDER || mate == FERMENTED_SPIDER_EYE || mate == GHAST_TEAR || mate == GLISTERING_MELON_SLICE || mate == GOLDEN_CARROT || mate == GUNPOWDER || mate == MAGMA_CREAM || mate == NETHER_WART || mate == PHANTOM_MEMBRANE || mate == PUFFERFISH || mate == RABBIT_FOOT || mate == SPIDER_EYE || mate == SUGAR || mate == TURTLE_HELMET || mate == POTION;
     }
 
     public static boolean checkmaterial(String mate){
@@ -120,8 +122,8 @@ public class Function {
             Bukkit.broadcast("result","advpot.op");
             return false;
         }
-        if (config.getConfigurationSection("result.1st") == null){
-            Bukkit.broadcast("result.1st","advpot.op");
+        if (config.getConfigurationSection("result.1") == null){
+            Bukkit.broadcast("result.1","advpot.op");
             return false;
         }
         return true;

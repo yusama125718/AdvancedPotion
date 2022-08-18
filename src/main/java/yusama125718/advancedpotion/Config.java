@@ -54,8 +54,8 @@ public class Config {
         PotionMaterial potmaterial = new PotionMaterial(config.getString("material.material"),config.getInt("material.cmd"),config.getString("material.name"),config.getBoolean("material.extended"),config.getBoolean("material.upgraded"));
         List<PotionItem> item = new ArrayList<PotionItem>();
         for (int i = 1;i < 3;i++){
-            if (config.getConfigurationSection("result."+ i +"st") == null) return new PotionRecipe(config.getString("name"),ingre,potmaterial,item);
-            item.add(new PotionItem(Material.getMaterial(Objects.requireNonNull(config.getString("result."+ i +"st.material"))),config.getInt("result."+ i +"st.cmd"),config.getInt("result."+ i +"st.amount"),config.getString("result."+ i +"st.name")));
+            if (config.getConfigurationSection("result."+ i) == null) return new PotionRecipe(config.getString("name"),ingre,potmaterial,item);
+            item.add(new PotionItem(Material.getMaterial(Objects.requireNonNull(config.getString("result."+ i + ".material"))),config.getInt("result."+ i +".cmd"),config.getInt("result."+ i +".amount"),config.getString("result."+ i +".name")));
         }
         return new PotionRecipe(config.getString("name"),ingre,potmaterial,item);
     }

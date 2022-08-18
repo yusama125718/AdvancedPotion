@@ -1,6 +1,8 @@
 package yusama125718.advancedpotion;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.BrewEvent;
@@ -11,8 +13,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,49 +43,13 @@ public class Event implements Listener{
         event.setCancelled(true);       //キャンセル処理
     }
 
-//    @EventHandler
-//    public void BrewRecipe(BrewEvent event) {
-//        if (!recipeoperation) return;
-//        for (PotionRecipe pot : recipe) {      //Recipe確認処理
-//            ItemStack ingredient = event.getContents().getIngredient();
-//            if (ingredient == null) continue;
-//            if (ingredient.getType() != pot.ingredient.material || ingredient.getItemMeta().getCustomModelData() != pot.ingredient.cmd || !ingredient.getItemMeta().getDisplayName().equals(pot.ingredient.name)) continue;
-//            int create = 0;
-//            boolean finish = false;
-//            for (int i = 0; i <= event.getResults().size() - 1; i++){
-//                if (event.getContents().getHolder().getInventory().getContents()[i] == null) continue;
-//                ItemStack result = event.getResults().get(i);
-//                ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
-//                if (material == null) continue;
-//                if (finish){
-//                    result.setItemMeta(material.getItemMeta());
-//                    result.setType(material.getType());
-//                    result.setAmount(material.getAmount());
-//                    continue;
-//                }
-//                if (material.getType() != Material.POTION || material.getItemMeta().getCustomModelData() != pot.material.cmd || !material.getItemMeta().getDisplayName().equals(pot.material.name)){
-//                    if (((PotionMeta) material.getItemMeta()).getBasePotionData().equals(new PotionData(PotionType.valueOf(pot.material.material), pot.material.extended, pot.material.upgraded))) {
-//                        result.setItemMeta(material.getItemMeta());
-//                        result.setType(material.getType());
-//                        result.setAmount(material.getAmount());
-//                        continue;
-//                    }
-//                }
-//                result.setItemMeta(pot.result.get(create).getItemMeta());
-//                result.setType(pot.result.get(create).material);
-//                result.setAmount(pot.result.get(create).amount);
-//                create++;
-//                if (create >= pot.result.size()) finish = true;
-//            }
-//        }
-//    }
-
     @EventHandler
     public void BrewRecipe(BrewEvent event) {      //Recipe用処理
         if (!recipeoperation) return;
         for (PotionRecipe pot : recipe) {
             ItemStack ingredient = event.getContents().getIngredient();
             if (ingredient == null) continue;
+            if (!ingredient.hasItemMeta() || !ingredient.getItemMeta().hasCustomModelData()) return;
             if (ingredient.getType() != pot.ingredient.material || ingredient.getItemMeta().getCustomModelData() != pot.ingredient.cmd || !ingredient.getItemMeta().getDisplayName().equals(pot.ingredient.name)) continue;
             int create = 0;
             boolean finish = false;
@@ -96,7 +64,6 @@ public class Event implements Listener{
                 ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
                 if (material == null) continue;
                 if (finish){
-                    System.out.println("iiiiiiiiiiii");
                     result.setItemMeta(material.getItemMeta());
                     result.setType(material.getType());
                     result.setAmount(material.getAmount());
@@ -104,7 +71,6 @@ public class Event implements Listener{
                 }
                 if (material.getType() != Material.POTION || material.getItemMeta().getCustomModelData() != pot.material.cmd || !material.getItemMeta().getDisplayName().equals(pot.material.name)){
                     if (((PotionMeta) material.getItemMeta()).getBasePotionData().equals(new PotionData(PotionType.valueOf(pot.material.material), pot.material.extended, pot.material.upgraded))) {
-                        System.out.println("uuuuuuuuuu");
                         result.setItemMeta(material.getItemMeta());
                         result.setType(material.getType());
                         result.setAmount(material.getAmount());
@@ -114,14 +80,17 @@ public class Event implements Listener{
                 create++;
                 if (create == pot.result.size()) finish = true;
             }
-            if (!finish) return;
-            for (int i = 0;create == 0;i++){
+            if (!finish) {
+                event.setCancelled(true);
+                return;
+            }
+            for (int i = 0;create > 0;i++){
                 ItemStack result = event.getResults().get(i);
                 ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
                 if (material == null) continue;
-                result.setItemMeta(pot.result.get(create).getItemMeta());
-                result.setType(pot.result.get(create).material);
-                result.setAmount(pot.result.get(create).amount);
+                result.setItemMeta(pot.result.get(create - 1).getItemMeta());
+                result.setType(pot.result.get(create - 1).material);
+                result.setAmount(pot.result.get(create - 1).amount);
                 create--;
             }
         }
@@ -133,13 +102,14 @@ public class Event implements Listener{
         if (!allowitem.containsKey(Objects.requireNonNull(event.getContents().getIngredient()).getType())) return;
         for (Integer number : allowitem.get(event.getContents().getIngredient().getType())) {
             if (!event.getContents().getIngredient().hasItemMeta()) return;
+            if (!event.getContents().getIngredient().getItemMeta().hasCustomModelData()) return;
             if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == number) return;
         }
         event.setCancelled(true);       //キャンセル処理
     }
 
     @EventHandler
-    public void AddGUIClick(InventoryClickEvent e){     //レシピ追加用
+    public void AddGUIClick(InventoryClickEvent e) throws IOException {     //レシピ追加用
         if (!e.getView().getTitle().equals("[AdvPot]Add Recipe")) return;
         if (e.getWhoClicked().hasPermission("advpot.op")) return;
         if (e.getCurrentItem() == null) return;
@@ -191,6 +161,23 @@ public class Event implements Listener{
             addlist.add(new PotionItem(inv.getItem(26).getType(),cmd,inv.getItem(26).getAmount(),inv.getItem(26).getI18NDisplayName()));
         }
         File folder = new File(configfile.getAbsolutePath() + File.separator + addname.get(e.getWhoClicked()) + ".yml");
+        YamlConfiguration yml = new YamlConfiguration();
+        yml.set("name",addname.get(e.getWhoClicked()));
+        yml.set("ingredient.material",ingre.material.toString());
+        yml.set("ingredient.cmd",ingre.cmd);
+        yml.set("ingredient.name",ingre.name);
+        yml.set("material.material",mate.material.toString());
+        yml.set("material.cmd",mate.cmd);
+        yml.set("material.name",mate.name);
+        yml.set("material.extended",mate.extended);
+        yml.set("material.upgraded",mate.upgraded);
+        for (int i = 1;i < addlist.size();i++){
+            yml.set("result."+i+".material",addlist.get(i-1).material.toString());
+            yml.set("result."+i+".cmd",addlist.get(i-1).cmd);
+            yml.set("result."+i+".name",addlist.get(i-1).name);
+            yml.set("result."+i+".amount",addlist.get(i-1).amount);
+        }
+        yml.save(folder);
         recipe.add(new PotionRecipe(addname.get(e.getWhoClicked()),ingre,mate,addlist));
         addname.remove(e.getWhoClicked());
         e.getInventory().close();

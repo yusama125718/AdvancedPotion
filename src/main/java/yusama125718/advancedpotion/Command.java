@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.Integer.parseInt;
 import static yusama125718.advancedpotion.AdvancedPotion.*;
@@ -31,16 +32,30 @@ public class Command implements CommandExecutor, TabCompleter {
                 switch (args[0]) {
                     case "help":        //help
                         if (sender.hasPermission("advpot.op")) {
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect on/off §r保護をon/offします");
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect add [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を許可します");
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect delete [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を禁止します");
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect check §r手に持っているアイテムの許可されているカスタムモデルデータを確認します");
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
+                            if (protectoperation){
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect add [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を許可します");
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect delete [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を禁止します");
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect check §r手に持っているアイテムの許可されているカスタムモデルデータを確認します");
+                            }else {
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect on/off §r保護をon/offします");
+                                sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
+                            }
                         }
-                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe §rレシピを確認します");
+                        if (recipeoperation){
+                            if (sender.hasPermission("advpot.op")){
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
+                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe §rレシピを確認します");
+                            }
+                        }else {
+                            if (sender.hasPermission("advpot.op")) sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
+                            sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
+                        }
                         return true;
 
                     case "recipe":
+                        if (!recipeoperation){
+                            sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
+                        }
                         RecipeList((Player) sender,1);
                         return true;
 
@@ -81,6 +96,9 @@ public class Command implements CommandExecutor, TabCompleter {
                                 return true;
 
                             case "check":       //登録確認
+                                if (!protectoperation){
+                                    sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
+                                }
                                 Material inhand = ((Player) sender).getInventory().getItemInMainHand().getType();
                                 if (!allowitem.containsKey(inhand)) {
                                     sender.sendMessage("§9§l[AdvancedPotion] §cそのアイテムは使えません");
@@ -133,6 +151,9 @@ public class Command implements CommandExecutor, TabCompleter {
                         if (!sender.hasPermission("advpot.op")) {         //permission確認
                             sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
                             return true;
+                        }
+                        if (!protectoperation){
+                            sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
                         }
                         if (args[1].equals("add")){     //保護追加処理
                             Material inhand = ((Player) sender).getInventory().getItemInMainHand().getType();
@@ -206,6 +227,13 @@ public class Command implements CommandExecutor, TabCompleter {
                         }
 
                     case "recipe":
+                        if (!sender.hasPermission("advpot.op")) {         //permission確認
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
+                            return true;
+                        }
+                        if (!recipeoperation){
+                            sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
+                        }
                         switch (args[1]){
                             case "add":
                                 addname.put((Player) sender,args[2]);
@@ -213,20 +241,18 @@ public class Command implements CommandExecutor, TabCompleter {
                                 return true;
 
                             case "remove":
-                                boolean check = false;
-                                Data.PotionRecipe target;
+                                Data.PotionRecipe target = null;
                                 for (Data.PotionRecipe data : recipe) {
-                                    if (data.name == args[2]) {
-                                        check = true;
+                                    if (Objects.equals(data.name, args[2])) {
                                         target = data;
                                         break;
                                     }
                                 }
-                                if (!check){
+                                if (target == null){
                                     sender.sendMessage("§9§l[AdvancedPotion] §cその名前のレシピは存在しません");
                                     return true;
                                 }
-                                for (File file : configfile){
+                                for (File file : configfile.listFiles()){
                                     if (!file.getName().equals(args[2])) continue;
                                     try{
                                         Files.move(removefile.getAbsoluteFile().toPath(), file.getAbsoluteFile().toPath());
