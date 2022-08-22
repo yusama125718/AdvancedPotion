@@ -19,29 +19,35 @@ public class Config {
     private static File removefolder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "removefiles");
 
     public static void RoadFile(){
+        boolean configserch = false;
+        boolean removeserch = false;
         if (potp.getDataFolder().listFiles() != null){
             for (File file : Objects.requireNonNull(potp.getDataFolder().listFiles())) {
                 if (file.getName().equals("recipes")) {
                     configfile = file;
-                    return;
+                    configserch = true;
                 }
                 if (file.getName().equals("removefiles")) {
-                    configfile = file;
-                    return;
+                    removefile = file;
+                    removeserch = true;
                 }
             }
         }
-        if (folder.mkdir()) {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダを作成しました", "advpot.op");
-            configfile = folder;
-        } else {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダの作成に失敗しました", "advpot.op");
+        if (!configserch){
+            if (folder.mkdir()) {
+                Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダを作成しました", "advpot.op");
+                configfile = folder;
+            } else {
+                Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダの作成に失敗しました", "advpot.op");
+            }
         }
-        if (removefolder.mkdir()) {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダを作成しました", "advpot.op");
-            removefile = removefolder;
-        } else {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダの作成に失敗しました", "advpot.op");
+        if (!removeserch){
+            if (removefolder.mkdir()) {
+                Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダを作成しました", "advpot.op");
+                removefile = removefolder;
+            } else {
+                Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダの作成に失敗しました", "advpot.op");
+            }
         }
     }
 

@@ -36,8 +36,9 @@ public class Event implements Listener{
     public void BrewingStandFuelEvent(BrewingStandFuelEvent event) {
         if (!protectoperation) return;
         if (!allowitem.containsKey(event.getFuel().getType())) return;
+        if (!event.getFuel().hasItemMeta()) return;
+        if (!event.getFuel().getItemMeta().hasCustomModelData()) return;
         for (Integer number : allowitem.get(Material.BLAZE_POWDER)) {       //確認処理
-            if (!event.getFuel().hasItemMeta()) return;
             if (event.getFuel().getItemMeta().getCustomModelData() == number) return;
         }
         event.setCancelled(true);       //キャンセル処理
@@ -100,10 +101,21 @@ public class Event implements Listener{
     public void BrewProtect(BrewEvent event){             //Protect用処理
         if (!protectoperation) return;
         if (!allowitem.containsKey(Objects.requireNonNull(event.getContents().getIngredient()).getType())) return;
+        if (!event.getContents().getIngredient().hasItemMeta()) return;
+        if (!event.getContents().getIngredient().getItemMeta().hasCustomModelData()) return;
         for (Integer number : allowitem.get(event.getContents().getIngredient().getType())) {
-            if (!event.getContents().getIngredient().hasItemMeta()) return;
-            if (!event.getContents().getIngredient().getItemMeta().hasCustomModelData()) return;
             if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == number) return;
+        }
+        for (PotionRecipe r : recipe){
+            if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == r.ingredient.cmd) return;
+        }
+        for (Integer number : allowitem.get(event.getContents().getIngredient().getType())) {
+            if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == number) return;
+        }
+        for (PotionRecipe r : recipe){
+            if (event.getContents().getHolder().getInventory().getContents()[0] != null && event.getContents().getHolder().getInventory().getContents()[0].getType() == POTION) if (event.getContents().getHolder().getInventory().getContents()[0].getItemMeta().getCustomModelData() == r.ingredient.cmd) return;
+            if (event.getContents().getHolder().getInventory().getContents()[1] != null && event.getContents().getHolder().getInventory().getContents()[1].getType() == POTION) if (event.getContents().getHolder().getInventory().getContents()[1].getItemMeta().getCustomModelData() == r.ingredient.cmd) return;
+            if (event.getContents().getHolder().getInventory().getContents()[2] != null && event.getContents().getHolder().getInventory().getContents()[2].getType() == POTION) if (event.getContents().getHolder().getInventory().getContents()[2].getItemMeta().getCustomModelData() == r.ingredient.cmd) return;
         }
         event.setCancelled(true);       //キャンセル処理
     }
@@ -111,25 +123,28 @@ public class Event implements Listener{
     @EventHandler
     public void AddGUIClick(InventoryClickEvent e) throws IOException {     //レシピ追加用
         if (!e.getView().getTitle().equals("[AdvPot]Add Recipe")) return;
-        if (e.getWhoClicked().hasPermission("advpot.op")) return;
+        if (!e.getWhoClicked().hasPermission("advpot.op")) {
+            e.setCancelled(true);
+            return;
+        }
         if (e.getCurrentItem() == null) return;
         if (e.getCurrentItem().getType() == BLACK_STAINED_GLASS_PANE || e.getCurrentItem().getType() == WHITE_STAINED_GLASS_PANE ){
             e.setCancelled(true);
             return;
         }
-        if (e.getCurrentItem().getType() != RED_STAINED_GLASS_PANE || e.getRawSlot() != 41) return;
+        if (e.getCurrentItem().getType() != RED_STAINED_GLASS_PANE || e.getRawSlot() != 49) return;
         Inventory inv = e.getInventory();
-        if (inv.getItem(12) == null || inv.getItem(24) == null || inv.getItem(30) == null) {
+        if (inv.getItem(11) == null || inv.getItem(23) == null || inv.getItem(29) == null) {
             e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §cアイテムが不足しています");
             e.setCancelled(true);
             return;
         }
-        if (!checkingredient(inv.getItem(12).getType())){
+        if (!checkingredient(inv.getItem(11).getType())){
             e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §c材料(上)が不正です");
             e.setCancelled(true);
             return;
         }
-        if (inv.getItem(30).getType() != POTION){
+        if (inv.getItem(29).getType() != POTION){
             e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §c材料(下)が不正です");
             e.setCancelled(true);
             return;
@@ -139,26 +154,26 @@ public class Event implements Listener{
             return;
         }
         int cmd = 0;
-        if (inv.getItem(12).getItemMeta().hasCustomModelData()) cmd = 0;
-        else cmd = inv.getItem(12).getItemMeta().getCustomModelData();
-        PotionIngredient ingre = new PotionIngredient(inv.getItem(12).getType(),cmd,inv.getItem(12).getItemMeta().getDisplayName());
-        if (inv.getItem(30).getItemMeta().hasCustomModelData()) cmd = 0;
-        else cmd = inv.getItem(30).getItemMeta().getCustomModelData();
-        PotionData data = ((PotionMeta) inv.getItem(30).getItemMeta()).getBasePotionData();
-        PotionMaterial mate = new PotionMaterial(data.getType().toString(),cmd,inv.getItem(30).getItemMeta().getDisplayName(),data.isExtended(), data.isUpgraded());
+        if (inv.getItem(11).getItemMeta().hasCustomModelData()) cmd = 0;
+        else cmd = inv.getItem(11).getItemMeta().getCustomModelData();
+        PotionIngredient ingre = new PotionIngredient(inv.getItem(11).getType(),cmd,inv.getItem(11).getItemMeta().displayName().toString());
+        if (inv.getItem(29).getItemMeta().hasCustomModelData()) cmd = 0;
+        else cmd = inv.getItem(29).getItemMeta().getCustomModelData();
+        PotionData data = ((PotionMeta) inv.getItem(29).getItemMeta()).getBasePotionData();
+        PotionMaterial mate = new PotionMaterial(data.getType().toString(),cmd,inv.getItem(29).getItemMeta().displayName().toString(),data.isExtended(), data.isUpgraded());
         List<PotionItem> addlist = new ArrayList<>();
-        if (inv.getItem(24).getItemMeta().hasCustomModelData()) cmd = 0;
-        else cmd = inv.getItem(24).getItemMeta().getCustomModelData();
-        addlist.add(new PotionItem(inv.getItem(24).getType(),cmd,inv.getItem(24).getAmount(),inv.getItem(24).getI18NDisplayName()));
-        if (inv.getItem(25) != null){
-            if (inv.getItem(25).getItemMeta().hasCustomModelData()) cmd = 0;
-            else cmd = inv.getItem(25).getItemMeta().getCustomModelData();
-            addlist.add(new PotionItem(inv.getItem(25).getType(),cmd,inv.getItem(25).getAmount(),inv.getItem(25).getI18NDisplayName()));
+        if (inv.getItem(23).getItemMeta().hasCustomModelData()) cmd = inv.getItem(23).getItemMeta().getCustomModelData();
+        else cmd = 0;
+        addlist.add(new PotionItem(inv.getItem(23).getType(),cmd,inv.getItem(23).getAmount(),inv.getItem(23).displayName().toString()));
+        if (inv.getItem(24) != null){
+            if (inv.getItem(24).getItemMeta().hasCustomModelData()) cmd = inv.getItem(24).getItemMeta().getCustomModelData();
+            else cmd = 0;
+            addlist.add(new PotionItem(inv.getItem(24).getType(),cmd,inv.getItem(24).getAmount(),inv.getItem(24).displayName().toString()));
         }
-        if (inv.getItem(26) != null){
-            if (inv.getItem(26).getItemMeta().hasCustomModelData()) cmd = 0;
-            else cmd = inv.getItem(26).getItemMeta().getCustomModelData();
-            addlist.add(new PotionItem(inv.getItem(26).getType(),cmd,inv.getItem(26).getAmount(),inv.getItem(26).getI18NDisplayName()));
+        if (inv.getItem(25) != null){
+            if (inv.getItem(25).getItemMeta().hasCustomModelData()) cmd = inv.getItem(25).getItemMeta().getCustomModelData();
+            else cmd = 0;
+            addlist.add(new PotionItem(inv.getItem(25).getType(),cmd,inv.getItem(25).getAmount(),inv.getItem(25).displayName().toString()));
         }
         File folder = new File(configfile.getAbsolutePath() + File.separator + addname.get(e.getWhoClicked()) + ".yml");
         YamlConfiguration yml = new YamlConfiguration();
@@ -180,6 +195,7 @@ public class Event implements Listener{
         yml.save(folder);
         recipe.add(new PotionRecipe(addname.get(e.getWhoClicked()),ingre,mate,addlist));
         addname.remove(e.getWhoClicked());
+        e.setCancelled(true);
         e.getInventory().close();
         e.getWhoClicked().sendMessage("§9§l[AdvancedPotion] §r追加しました");
     }
