@@ -36,6 +36,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     case "recipe":
                         if (!recipeoperation){
                             sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
+                            return true;
                         }
                         RecipeList((Player) sender,1);
                         return true;
@@ -82,6 +83,7 @@ public class Command implements CommandExecutor, TabCompleter {
                             case "check":       //登録確認
                                 if (!protectoperation){
                                     sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
+                                    return true;
                                 }
                                 Material inhand = ((Player) sender).getInventory().getItemInMainHand().getType();
                                 if (!allowitem.containsKey(inhand)) {
@@ -138,6 +140,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     case "protect":
                         if (!protectoperation){
                             sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
+                            return true;
                         }
                         if (args[1].equals("add")){     //保護追加処理
                             Material inhand = ((Player) sender).getInventory().getItemInMainHand().getType();
@@ -213,9 +216,16 @@ public class Command implements CommandExecutor, TabCompleter {
                     case "recipe":
                         if (!recipeoperation){
                             sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
+                            return true;
                         }
                         switch (args[1]){
                             case "add":
+                                List<String> returnlist = new ArrayList<>();
+                                for (Data.PotionRecipe p : recipe) returnlist.add(p.name);
+                                if (returnlist.contains(args[2])){
+                                    sender.sendMessage("§9§l[AdvancedPotion] §cその名前は既に使われています");
+                                    return true;
+                                }
                                 addname.put((Player) sender,args[2]);
                                 addrecipeGUI((Player) sender);
                                 return true;
@@ -252,6 +262,10 @@ public class Command implements CommandExecutor, TabCompleter {
                         }
 
                     case "give":
+                        if (!recipeoperation){
+                            sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
+                            return true;
+                        }
                         for (Data.PotionRecipe r : recipe){
                             if (!r.name.equals(args[2])) continue;
                             Player p = Bukkit.getPlayer(args[1]);

@@ -50,8 +50,10 @@ public class Event implements Listener{
         for (Integer n : allowitem.get(event.getContents().getIngredient().getType())) {
             if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == n) return;     //通常の除外対象か確認(上)
         }
-        for (PotionRecipe r : recipe){      //recipeの醸造か確認
-            if (event.getContents().getIngredient().equals(r.ingredient)) return;
+        if (recipeoperation){
+            for (PotionRecipe r : recipe){      //recipeの醸造か確認
+                if (event.getContents().getIngredient().equals(r.ingredient)) return;
+            }
         }
         event.setCancelled(true);       //キャンセル処理
     }
@@ -191,11 +193,15 @@ public class Event implements Listener{
 
     @EventHandler
     public void RecipeGUIClick(InventoryClickEvent e) {     //レシピ確認用
-        if (e.getCurrentItem() == null || e.getInventory().getSize() != 54) return;
+        if (e.getInventory().getSize() != 54) return;
         String title = null;
         Component component = e.getView().title();
         if (component instanceof TextComponent text) title = text.content();
         if (title == null || title.length() != 20 || !title.startsWith("[AdvPot]Recipe List")) return;
+        if (e.getCurrentItem() == null) {
+            e.setCancelled(true);
+            return;
+        }
         boolean isNumeric = title.substring(19).matches("-?\\d+");
         if (!isNumeric) return;
         int page = parseInt(title.substring(19));
@@ -209,7 +215,10 @@ public class Event implements Listener{
             e.setCancelled(true);
             return;
         }
-        if (45 <= e.getRawSlot() && e.getRawSlot() <= 53 || e.getRawSlot() + 45 * (page - 1) >= recipe.size()) return;
+        if (45 <= e.getRawSlot() && e.getRawSlot() <= 53 || e.getRawSlot() + 45 * (page - 1) >= recipe.size()) {
+            e.setCancelled(true);
+            return;
+        }
         RecipeExample((Player) e.getWhoClicked(), e.getRawSlot() + 45 * (page - 1));
         e.setCancelled(true);
     }
