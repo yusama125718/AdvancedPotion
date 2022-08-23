@@ -20,7 +20,6 @@ public final class AdvancedPotion extends JavaPlugin implements Listener, Comman
     public static boolean protectoperation;
     public static ArrayList<Data.PotionRecipe> recipe = new ArrayList<>();
     public static File configfile;
-    public static File removefile;
     public static HashMap<Player,String> addname = new HashMap<>();
 
     @Override

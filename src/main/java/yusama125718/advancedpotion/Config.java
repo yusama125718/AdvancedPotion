@@ -1,9 +1,8 @@
 package yusama125718.advancedpotion;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,54 +14,37 @@ import static yusama125718.advancedpotion.Data.*;
 import static yusama125718.advancedpotion.Function.*;
 
 public class Config {
-    private static File folder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "recipes");
-    private static File removefolder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "removefiles");
+    private static final File folder = new File(potp.getDataFolder().getAbsolutePath() + File.separator + "recipes");
 
     public static void RoadFile(){
-        boolean configserch = false;
-        boolean removeserch = false;
         if (potp.getDataFolder().listFiles() != null){
             for (File file : Objects.requireNonNull(potp.getDataFolder().listFiles())) {
                 if (file.getName().equals("recipes")) {
                     configfile = file;
-                    configserch = true;
-                }
-                if (file.getName().equals("removefiles")) {
-                    removefile = file;
-                    removeserch = true;
+                    return;
                 }
             }
         }
-        if (!configserch){
-            if (folder.mkdir()) {
-                Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダを作成しました", "advpot.op");
-                configfile = folder;
-            } else {
-                Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダの作成に失敗しました", "advpot.op");
-            }
-        }
-        if (!removeserch){
-            if (removefolder.mkdir()) {
-                Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダを作成しました", "advpot.op");
-                removefile = removefolder;
-            } else {
-                Bukkit.broadcast("§9§l[AdvancedPotion] §r削除フォルダの作成に失敗しました", "advpot.op");
-            }
+        if (folder.mkdir()) {
+            Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダを作成しました", "advpot.op");
+            configfile = folder;
+        } else {
+            Bukkit.broadcast("§9§l[AdvancedPotion] §rレシピフォルダの作成に失敗しました", "advpot.op");
         }
     }
 
-    public static PotionRecipe getConfig(YamlConfiguration config){
+    public static PotionRecipe getConfig(YamlConfiguration config,File file){
         if (!checknull(config)) {
-            Bukkit.broadcast("§9§l[AdvancedPotion] §r" + config.getName() + "の読み込みに失敗しました","advpot.op");
+            Bukkit.broadcast("§9§l[AdvancedPotion] §r" + file.getName() + "の読み込みに失敗しました","advpot.op");
             return null;
         }
-        PotionIngredient ingre = new PotionIngredient(Material.getMaterial(Objects.requireNonNull(config.getString("ingredient.material"))), config.getInt("ingredient.cmd"), config.getString("ingredient.name"));
-        PotionMaterial potmaterial = new PotionMaterial(config.getString("material.material"),config.getInt("material.cmd"),config.getString("material.name"),config.getBoolean("material.extended"),config.getBoolean("material.upgraded"));
-        List<PotionItem> item = new ArrayList<PotionItem>();
-        for (int i = 1;i < 3;i++){
-            if (config.getConfigurationSection("result."+ i) == null) return new PotionRecipe(config.getString("name"),ingre,potmaterial,item);
-            item.add(new PotionItem(Material.getMaterial(Objects.requireNonNull(config.getString("result."+ i + ".material"))),config.getInt("result."+ i +".cmd"),config.getInt("result."+ i +".amount"),config.getString("result."+ i +".name")));
+        ItemStack ingre = config.getItemStack("ingredient");
+        ItemStack potmaterial = config.getItemStack("material");
+        List<ItemStack> item = new ArrayList<ItemStack>();
+        for (int i = 1;i < 3;i++) {
+            if (config.get("result."+ i) == null) return new PotionRecipe(config.getString("name"),ingre,potmaterial,item,config.getInt("maxcreate"));
+            item.add(config.getItemStack("result." + i));
         }
-        return new PotionRecipe(config.getString("name"),ingre,potmaterial,item);
+        return new PotionRecipe(config.getString("name"),ingre,potmaterial,item,config.getInt("maxcreate"));
     }
 }

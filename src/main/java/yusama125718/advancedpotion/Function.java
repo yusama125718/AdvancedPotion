@@ -3,17 +3,11 @@ package yusama125718.advancedpotion;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionType;
 
 import java.io.File;
-import java.io.IOError;
 import java.util.List;
 
 import static org.bukkit.Material.*;
@@ -23,11 +17,12 @@ import static yusama125718.advancedpotion.Config.*;
 public class Function {
     public static boolean reloadconfig(){
         Bukkit.broadcast("§9§l[AdvancedPotion] §rリロードします", "advpot.op");       //configロード
+        recipe.clear();
         potp.saveDefaultConfig();
         RoadFile();
         if (configfile.listFiles() != null){
             for (File file : configfile.listFiles()){
-                if (getConfig(YamlConfiguration.loadConfiguration(file)) != null) recipe.add(getConfig(YamlConfiguration.loadConfiguration(file)));
+                if (getConfig(YamlConfiguration.loadConfiguration(file),file) != null) recipe.add(getConfig(YamlConfiguration.loadConfiguration(file),file));
             }
         }
 
@@ -69,60 +64,28 @@ public class Function {
         return mate == BLAZE_POWDER || mate == FERMENTED_SPIDER_EYE || mate == GHAST_TEAR || mate == GLISTERING_MELON_SLICE || mate == GOLDEN_CARROT || mate == GUNPOWDER || mate == MAGMA_CREAM || mate == NETHER_WART || mate == PHANTOM_MEMBRANE || mate == PUFFERFISH || mate == RABBIT_FOOT || mate == SPIDER_EYE || mate == SUGAR || mate == TURTLE_HELMET || mate == POTION;
     }
 
-    public static boolean checkmaterial(String mate){
-        try {
-            ItemStack item = new ItemStack(POTION,1);
-            ItemMeta meta = item.getItemMeta();
-            PotionMeta potionMeta = (PotionMeta) meta;
-            potionMeta.setBasePotionData(new PotionData(PotionType.valueOf(mate), false, false));
-            return true;
-        } catch (IOError error){
-            return false;
-        }
-    }
-
     public static boolean checknull(YamlConfiguration config){
         if (config.getString("name") == null) {
             Bukkit.broadcast("name","advpot.op");
             return false;
         }
-        if (config.getString("ingredient.material") == null) {
-            Bukkit.broadcast("ingredient.material","advpot.op");
+        if (config.get("maxcreate") == null) {
+            Bukkit.broadcast("maxcreate", "advpot.op");
             return false;
         }
-        if (!checkingredient(Material.getMaterial(config.getString("ingredient.material")))) {
-            Bukkit.broadcast("ingredient.material.check","advpot.op");
+        if (config.get("ingredient") == null) {
+            Bukkit.broadcast("ingredient", "advpot.op");
             return false;
         }
-        if (config.getString("ingredient.cmd") == null) {
-            Bukkit.broadcast("ingredient.cmd","advpot.op");
+        if (config.get("material") == null) {
+            Bukkit.broadcast("material","advpot.op");
             return false;
         }
-        if (config.getString("ingredient.name") == null) {
-            Bukkit.broadcast("ingredient.name","advpot.op");
-            return false;
-        }
-        if (config.getString("material.material") == null) {
-            Bukkit.broadcast("material.material","advpot.op");
-            return false;
-        }
-        if (!checkmaterial(config.getString("material.material"))) {
-            Bukkit.broadcast("material.material.check","advpot.op");
-            return false;
-        }
-        if (config.getString("material.cmd") == null) {
-            Bukkit.broadcast("material.cmd","advpot.op");
-            return false;
-        }
-        if (config.getString("material.name") == null) {
-            Bukkit.broadcast("material.name","advpot.op");
-            return false;
-        }
-        if (config.getConfigurationSection("result") == null) {
+        if (config.get("result") == null) {
             Bukkit.broadcast("result","advpot.op");
             return false;
         }
-        if (config.getConfigurationSection("result.1") == null){
+        if (config.get("result.1") == null){
             Bukkit.broadcast("result.1","advpot.op");
             return false;
         }
@@ -134,16 +97,6 @@ public class Function {
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(name));
         meta.setCustomModelData(cmd);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    public static ItemStack getItem(Material mate,Integer amount,String name,Integer cmd,PotionType type,boolean extended,boolean upgraded){
-        ItemStack item = new ItemStack(mate,amount);
-        ItemMeta meta = item.getItemMeta();
-        meta.displayName(Component.text(name));
-        meta.setCustomModelData(cmd);
-        ((PotionMeta) meta).setBasePotionData(new PotionData(type,extended,upgraded));
         item.setItemMeta(meta);
         return item;
     }

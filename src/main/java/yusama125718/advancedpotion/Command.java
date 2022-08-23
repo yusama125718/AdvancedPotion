@@ -1,4 +1,5 @@
 package yusama125718.advancedpotion;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -8,48 +9,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.lang.Integer.parseInt;
 import static yusama125718.advancedpotion.AdvancedPotion.*;
+import static yusama125718.advancedpotion.Function.reloadconfig;
 import static yusama125718.advancedpotion.GUI.*;
 
 public class Command implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, @NotNull String[] args) {   //コマンド処理
-        if (!sender.hasPermission("advpot.op")) {         //permission確認
-            sender.sendMessage("§c[PotionProtect] You don't have Permission");
-            return true;
-        }
-
         switch (args.length) {
             case 1:
                 switch (args[0]) {
                     case "help":        //help
                         if (sender.hasPermission("advpot.op")) {
-                            if (protectoperation){
-                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect add [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を許可します");
-                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect delete [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を禁止します");
-                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect check §r手に持っているアイテムの許可されているカスタムモデルデータを確認します");
-                            }else {
-                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect on/off §r保護をon/offします");
-                                sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
-                            }
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect add [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を許可します");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect delete [数字] §r手に持っているアイテムの指定したカスタムモデルデータのポーションへの使用を禁止します");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect check §r手に持っているアイテムの許可されているカスタムモデルデータを確認します");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot protect on/off §r保護をon/offします");
+                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
                         }
-                        if (recipeoperation){
-                            if (sender.hasPermission("advpot.op")){
-                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
-                                sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe §rレシピを確認します");
-                            }
-                        }else {
-                            if (sender.hasPermission("advpot.op")) sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe on/off §rレシピをon/offします");
-                            sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
-                        }
+                        sender.sendMessage("§9§l[AdvancedPotion] §7/advpot recipe §rレシピを確認します");
                         return true;
 
                     case "recipe":
@@ -59,20 +40,23 @@ public class Command implements CommandExecutor, TabCompleter {
                         RecipeList((Player) sender,1);
                         return true;
 
+                    case "reload":
+                        reloadconfig();
+                        return true;
+
                     default:
                         sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
                         return true;
                 }
 
             case 2:
+                if (!sender.hasPermission("advpot.op")) {         //permission確認
+                    sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
+                    return true;
+                }
                 switch (args[0]){
                     case "protect":
-                        if (!sender.hasPermission("advpot.op")) {         //permission確認
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
-                            return true;
-                        }
                         switch (args[1]){
-
                             case "on":      //保護on
                                 if (protectoperation) {
                                     sender.sendMessage("§9§l[AdvancedPotion] §cすでに有効になっています");
@@ -146,12 +130,12 @@ public class Command implements CommandExecutor, TabCompleter {
                 }
 
             case 3:
+                if (!sender.hasPermission("advpot.op")) {         //permission確認
+                    sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
+                    return true;
+                }
                 switch (args[0]){
                     case "protect":
-                        if (!sender.hasPermission("advpot.op")) {         //permission確認
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
-                            return true;
-                        }
                         if (!protectoperation){
                             sender.sendMessage("§9§l[AdvancedPotion] §r保護機能は現在停止中です");
                         }
@@ -227,10 +211,6 @@ public class Command implements CommandExecutor, TabCompleter {
                         }
 
                     case "recipe":
-                        if (!sender.hasPermission("advpot.op")) {         //permission確認
-                            sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
-                            return true;
-                        }
                         if (!recipeoperation){
                             sender.sendMessage("§9§l[AdvancedPotion] §rレシピ機能は現在停止中です");
                         }
@@ -240,7 +220,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 addrecipeGUI((Player) sender);
                                 return true;
 
-                            case "remove":
+                            case "delete":
                                 Data.PotionRecipe target = null;
                                 for (Data.PotionRecipe data : recipe) {
                                     if (Objects.equals(data.name, args[2])) {
@@ -253,23 +233,40 @@ public class Command implements CommandExecutor, TabCompleter {
                                     return true;
                                 }
                                 for (File file : configfile.listFiles()){
-                                    if (!file.getName().equals(args[2])) continue;
-                                    try{
-                                        Files.move(removefile.getAbsoluteFile().toPath(), file.getAbsoluteFile().toPath());
-                                    }catch(IOException e){
-                                        System.out.println(e);
-                                        sender.sendMessage("§9§l[AdvancedPotion] §cファイルの移動に失敗しました");
+                                    if (!file.getName().equals(args[2] + ".yml")) continue;
+                                    if (file.delete()) {
+                                        recipe.remove(target);
+                                        sender.sendMessage("§9§l[AdvancedPotion] §r削除しました");
+                                        return true;
+                                    }else{
+                                        sender.sendMessage("§9§l[AdvancedPotion] §cファイルの削除に失敗しました");
                                         return true;
                                     }
-                                    recipe.remove(target);
-                                    sender.sendMessage("§9§l[AdvancedPotion] §r削除しました(ファイルは専用ディレクトリで保管されています)");
                                 }
+                                sender.sendMessage("§9§l[AdvancedPotion] §cファイルが見つかりませんでした");
                                 return true;
 
                             default:
                                 sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
                                 return true;
                         }
+
+                    case "give":
+                        for (Data.PotionRecipe r : recipe){
+                            if (!r.name.equals(args[2])) continue;
+                            Player p = Bukkit.getPlayer(args[1]);
+                            if (p == null) {
+                                sender.sendMessage("§9§l[AdvancedPotion] §cその名前のプレイヤーは存在しません");
+                                return true;
+                            }
+                            p.getInventory().addItem(r.result.get(0));
+                            if (r.result.size() > 1) p.getInventory().addItem(r.result.get(1));
+                            if (r.result.size() > 2) p.getInventory().addItem(r.result.get(2));
+                            sender.sendMessage("§9§l[AdvancedPotion] §r" + p.getName() + "に" + r.name + "の結果を与えました");
+                            return true;
+                        }
+                        sender.sendMessage("§9§l[AdvancedPotion] §cそのレシピは存在しません");
+                        return true;
 
                     default:
                         sender.sendMessage("§9§l[AdvancedPotion] §7/advpot help §rでhelpを表示");
@@ -290,43 +287,92 @@ public class Command implements CommandExecutor, TabCompleter {
             if (args.length == 1){
                 if (args[0].length() == 0)
                 {
-                    return Arrays.asList("add","check","delete","help","off","on");
+                    return Arrays.asList("give","protect","recipe","reload");
                 }
-
-                else {
-                    if ("on".startsWith(args[0])&&"off".startsWith(args[0]))
-                    {
-                        return Arrays.asList("off","on");
+                else{
+                    if ("recipe".startsWith(args[0]) && "reload".startsWith(args[0])) {
+                        return Arrays.asList("recipe", "reload");
                     }
-                    else if ("add".startsWith(args[0]))
-                    {
-                        return Collections.singletonList("add");
+                    else if ("give".startsWith(args[0])) {
+                        return Collections.singletonList("give");
                     }
-                    else if ("check".startsWith(args[0]))
-                    {
-                        return Collections.singletonList("check");
+                    else if ("protect".startsWith(args[0])) {
+                        return Collections.singletonList("protect");
                     }
-                    else if ("delete".startsWith(args[0]))
-                    {
-                        return Collections.singletonList("delete");
+                    else if ("recipe".startsWith(args[0])) {
+                        return Collections.singletonList("recipe");
                     }
-                    else if ("help".startsWith(args[0]))
-                    {
-                        return Collections.singletonList("help");
-                    }
-                    else if ("on".startsWith(args[0]))
-                    {
-                        return Collections.singletonList("on");
-                    }
-                    else if ("off".startsWith(args[0]))
-                    {
-                        return Collections.singletonList("off");
+                    else if ("reload".startsWith(args[0])) {
+                        return Collections.singletonList("reload");
                     }
                 }
             }
             else if (args.length == 2){
-                if (args[0].equals("add")||args[0].equals("delete")){
+                if (args[0].equals("protect")){
+                    if (args[1].length() == 0){
+                        return Arrays.asList("add","check","delete","off","on");
+                    }
+                    else {
+                        if ("on".startsWith(args[1]) && "off".startsWith(args[1])) {
+                            return Arrays.asList("off", "on");
+                        }
+                        else if ("add".startsWith(args[1])) {
+                            return Collections.singletonList("add");
+                        }
+                        else if ("check".startsWith(args[1])) {
+                            return Collections.singletonList("check");
+                        }
+                        else if ("delete".startsWith(args[1])) {
+                            return Collections.singletonList("delete");
+                        }
+                        else if ("on".startsWith(args[1])) {
+                            return Collections.singletonList("on");
+                        }
+                        else if ("off".startsWith(args[1])) {
+                            return Collections.singletonList("off");
+                        }
+                    }
+                }
+                else if (args[0].equals("recipe")) {
+                    if (args[1].length() == 0) {
+                        return Arrays.asList("add", "delete", "off", "on");
+                    } else {
+                        if ("on".startsWith(args[1]) && "off".startsWith(args[1])) {
+                            return Arrays.asList("off", "on");
+                        }
+                        else if ("add".startsWith(args[1])) {
+                            return Collections.singletonList("add");
+                        }
+                        else if ("delete".startsWith(args[1])) {
+                            return Collections.singletonList("delete");
+                        }
+                        else if ("on".startsWith(args[1])) {
+                            return Collections.singletonList("on");
+                        }
+                        else if ("off".startsWith(args[1])) {
+                            return Collections.singletonList("off");
+                        }
+                    }
+                }
+            }
+            else if (args.length == 3){
+                if (args[0].equals("give")){
+                    List<String> returnlist = new ArrayList<>();
+                    for (Data.PotionRecipe p : recipe) returnlist.add(p.name);
+                    return returnlist;
+                }
+                else if (args[0].equals("protect") && (args[1].equals("add") || args[1].equals("delete"))){
                     return Collections.singletonList("[カスタムモデルデータ]");
+                }
+                else if (args[0].equals("recipe")){
+                    if (args[1].equals("add")){
+                        return Collections.singletonList("[レシピ名]");
+                    }
+                    else if (args[1].equals("delete")){
+                        List<String> returnlist = new ArrayList<>();
+                        for (Data.PotionRecipe p : recipe) returnlist.add(p.name);
+                        return returnlist;
+                    }
                 }
             }
         }
