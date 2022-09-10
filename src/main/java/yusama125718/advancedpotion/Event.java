@@ -64,6 +64,8 @@ public class Event implements Listener{
         for (PotionRecipe pot : recipe) {
             ItemStack ingredient = event.getContents().getIngredient();
             if (ingredient == null) continue;
+            int iamo = ingredient.getAmount();
+            if (ingredient.getAmount() > pot.ingredient.getAmount()) ingredient.setAmount(pot.ingredient.getAmount());
             if (!ingredient.equals(pot.ingredient)) continue;
             int create = 0;
             boolean finish = false;
@@ -121,7 +123,11 @@ public class Event implements Listener{
                 replace++;
                 create--;
             }
+            ingredient.setAmount(iamo - pot.ingredient.getAmount());
+            event.getContents().setIngredient(ingredient);
+            return;
         }
+        event.setCancelled(true);
     }
 
     @EventHandler

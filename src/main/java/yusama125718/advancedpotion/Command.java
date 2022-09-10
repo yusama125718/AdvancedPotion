@@ -148,16 +148,16 @@ public class Command implements CommandExecutor, TabCompleter {
                                 sender.sendMessage("§9§l[AdvancedPotion] §cそのアイテムは使えません");
                                 return true;
                             }
-                            boolean isNumeric = args[1].matches("-?\\d+");
+                            boolean isNumeric = args[2].matches("-?\\d+");
                             if (!isNumeric) {
                                 sender.sendMessage("§9§l[AdvancedPotion] §c無効な数字です");
                                 return true;
                             }
-                            if (args[1].length() >= 10) {
+                            if (args[2].length() >= 10) {
                                 sender.sendMessage("§9§l[AdvancedPotion] §c無効な数字です");
                                 return true;
                             }
-                            int addnumber = parseInt(args[1]);
+                            int addnumber = parseInt(args[2]);
                             if (addnumber < 0) {
                                 sender.sendMessage("§9§l[AdvancedPotion] §c無効な数字です");
                                 return true;
@@ -181,16 +181,16 @@ public class Command implements CommandExecutor, TabCompleter {
                                 sender.sendMessage("§9§l[AdvancedPotion] §cそのアイテムは使えません");
                                 return true;
                             }
-                            boolean isNumeric = args[1].matches("-?\\d+");
+                            boolean isNumeric = args[2].matches("-?\\d+");
                             if (!isNumeric) {
                                 sender.sendMessage("§9§l[AdvancedPotion] §c無効な数字です");
                                 return true;
                             }
-                            if (args[1].length() >= 10) {
+                            if (args[2].length() >= 10) {
                                 sender.sendMessage("§9§l[AdvancedPotion] §c無効な数字です");
                                 return true;
                             }
-                            int removenumber = parseInt(args[1]);
+                            int removenumber = parseInt(args[2]);
                             if (removenumber < 0) {
                                 sender.sendMessage("§9§l[AdvancedPotion] §c無効な数字です");
                                 return true;
@@ -295,7 +295,14 @@ public class Command implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (!sender.hasPermission("advpot.op")) return null;      //permission確認
+        if (!sender.hasPermission("advpot.op")){      //permission確認
+            if (args.length == 1){
+                if (args[0].length() == 0 || "recipe".startsWith(args[0])){
+                    return Collections.singletonList("recipe");
+                }
+            }
+            return null;
+        }
 
         if(command.getName().equalsIgnoreCase("advpot")){
             if (args.length == 1){
