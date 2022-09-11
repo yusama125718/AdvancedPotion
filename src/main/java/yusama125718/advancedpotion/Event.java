@@ -43,23 +43,10 @@ public class Event implements Listener{
     }
 
     @EventHandler
-    public void BrewProtect(BrewEvent event){             //醸造Protect用処理
-        if (!protectoperation) return;
-        if (!allowitem.containsKey(Objects.requireNonNull(event.getContents().getIngredient()).getType())) return;
-        if (!event.getContents().getIngredient().hasItemMeta() || !event.getContents().getIngredient().getItemMeta().hasCustomModelData()) return;
-        for (Integer n : allowitem.get(event.getContents().getIngredient().getType())) {
-            if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == n) return;     //通常の除外対象か確認(上)
-        }
-        if (recipeoperation){
-            for (PotionRecipe r : recipe){      //recipeの醸造か確認
-                if (event.getContents().getIngredient().equals(r.ingredient)) return;
-            }
-        }
-        event.setCancelled(true);       //キャンセル処理
-    }
-
-    @EventHandler
-    public void BrewRecipe(BrewEvent event) {      //Recipe用処理
+    public void BrewRecipe(BrewEvent event) {
+        ///////////////////////////////////////////////////////
+        //  ここからRecipe用処理処理                             //
+        ///////////////////////////////////////////////////////
         if (!recipeoperation) return;
         for (PotionRecipe pot : recipe) {
             ItemStack ingredient = event.getContents().getIngredient();
@@ -123,11 +110,20 @@ public class Event implements Listener{
                 replace++;
                 create--;
             }
-            ingredient.setAmount(iamo - pot.ingredient.getAmount());
+            ingredient.setAmount(iamo - pot.ingredient.getAmount() + 1);
             event.getContents().setIngredient(ingredient);
             return;
         }
-        event.setCancelled(true);
+        ///////////////////////////////////////////////////////
+        //  ここからProtect用処理                               //
+        ///////////////////////////////////////////////////////
+        if (!protectoperation) return;
+        if (!allowitem.containsKey(Objects.requireNonNull(event.getContents().getIngredient()).getType())) return;
+        if (!event.getContents().getIngredient().hasItemMeta() || !event.getContents().getIngredient().getItemMeta().hasCustomModelData()) return;
+        for (Integer n : allowitem.get(event.getContents().getIngredient().getType())) {
+            if (event.getContents().getIngredient().getItemMeta().getCustomModelData() == n) return;     //通常の除外対象か確認(上)
+        }
+        event.setCancelled(true);       //キャンセル処理
     }
 
     @EventHandler
