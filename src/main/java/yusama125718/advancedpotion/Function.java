@@ -40,6 +40,8 @@ public class Function {
         allowitem.put(Material.GUNPOWDER,gunpowder);
         List<Integer> magma = potp.getConfig().getIntegerList("MAGMA_CREAM");
         allowitem.put(Material.MAGMA_CREAM,magma);
+        List<Integer> wart = potp.getConfig().getIntegerList("NETHER_WART");
+        allowitem.put(NETHER_WART,wart);
         List<Integer> phantom = potp.getConfig().getIntegerList("PHANTOM_MEMBRANE");
         allowitem.put(Material.PHANTOM_MEMBRANE,phantom);
         List<Integer> pufferfish = potp.getConfig().getIntegerList("PUFFERFISH");

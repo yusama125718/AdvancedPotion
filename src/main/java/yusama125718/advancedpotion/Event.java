@@ -47,72 +47,67 @@ public class Event implements Listener{
         ///////////////////////////////////////////////////////
         //  ここからRecipe用処理処理                             //
         ///////////////////////////////////////////////////////
-        if (!recipeoperation) return;
-        for (PotionRecipe pot : recipe) {
-            ItemStack ingredient = event.getContents().getIngredient();
-            if (ingredient == null) continue;
-            int iamo = ingredient.getAmount();
-            if (ingredient.getAmount() > pot.ingredient.getAmount()) ingredient.setAmount(pot.ingredient.getAmount());
-            if (!ingredient.equals(pot.ingredient)) continue;
-            int create = 0;
-            boolean finish = false;
-            if (event.getResults().size() < pot.result.size()){
-                event.setCancelled(true);
-                return;
-            }
-            for (int i = 0; i <= event.getResults().size() - 1; i++){       //下の材料が正しいか確認
-                if (event.getContents().getHolder().getInventory().getContents()[i] == null) continue;
-                ItemStack result = event.getResults().get(i);
-                ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
-                if (material == null) continue;
-                if (finish){
-                    System.out.println("finish");
-                    if (material.hasItemMeta()) result.setItemMeta(material.getItemMeta());
-                    result.setType(material.getType());
-                    result.setAmount(material.getAmount());
-                    continue;
-                }
-                if (!material.equals(pot.material)){
-                    if (material.hasItemMeta()) result.setItemMeta(material.getItemMeta());
-                    result.setType(material.getType());
-                    result.setAmount(material.getAmount());
-                    continue;
-                }
-                create++;
-                if (pot.cancreate == 0) if (create >= pot.result.size()) finish = true;
-                else if (create <= pot.cancreate) finish = true;
-            }
-            if ((create == 0 && pot.cancreate != 0) || (create != pot.result.size() && pot.cancreate == 0)) {
-                event.setCancelled(true);
-                return;
-            }
-            int replace = 0;
-            for (int i = 0;create > 0;i++){     //置き換え処理
-                ItemStack result = event.getResults().get(i);
-                ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
-                if (material == null || !material.equals(pot.material)) continue;
-                if (pot.cancreate == 0){
-                    result.setType(pot.result.get(create - 1).getType());
-                    result.setAmount(pot.result.get(create - 1).getAmount());
-                    if (pot.result.get(create - 1).hasItemMeta()) result.setItemMeta(pot.result.get(create - 1).getItemMeta());
-                } else {
-                    if (replace >= pot.cancreate) {
+        if (recipeoperation){
+            for (PotionRecipe pot : recipe) {
+                if (event.getContents().getIngredient() == null) return;
+                ItemStack ingredient = new ItemStack(event.getContents().getIngredient()) ;
+                int  iamo = ingredient.getAmount();
+                if (ingredient.getAmount() > pot.ingredient.getAmount()) ingredient.setAmount(pot.ingredient.getAmount());
+                if (!ingredient.equals(pot.ingredient)) continue;
+                int create = 0;
+                boolean finish = false;
+                if (event.getResults().size() < pot.result.size()) continue;
+                for (int i = 0; i <= event.getResults().size() - 1; i++){       //下の材料が正しいか確認
+                    if (event.getContents().getHolder().getInventory().getContents()[i] == null) continue;
+                    ItemStack result = event.getResults().get(i);
+                    ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
+                    if (material == null) continue;
+                    if (finish){
+                        System.out.println("finish");
                         if (material.hasItemMeta()) result.setItemMeta(material.getItemMeta());
                         result.setType(material.getType());
                         result.setAmount(material.getAmount());
-                        create--;
                         continue;
                     }
-                    result.setType(pot.result.get(0).getType());
-                    result.setAmount(pot.result.get(0).getAmount());
-                    if (pot.result.get(0).hasItemMeta()) result.setItemMeta(pot.result.get(0).getItemMeta());
+                    if (!material.equals(pot.material)){
+                        if (material.hasItemMeta()) result.setItemMeta(material.getItemMeta());
+                        result.setType(material.getType());
+                        result.setAmount(material.getAmount());
+                        continue;
+                    }
+                    create++;
+                    if (pot.cancreate == 0) if (create >= pot.result.size()) finish = true;
+                    else if (create <= pot.cancreate) finish = true;
                 }
-                replace++;
-                create--;
+                if ((create == 0 && pot.cancreate != 0) || (create != pot.result.size() && pot.cancreate == 0)) continue;
+                int replace = 0;
+                for (int i = 0;create > 0;i++){     //置き換え処理
+                    ItemStack result = event.getResults().get(i);
+                    ItemStack material = event.getContents().getHolder().getInventory().getContents()[i];
+                    if (material == null || !material.equals(pot.material)) continue;
+                    if (pot.cancreate == 0){
+                        result.setType(pot.result.get(create - 1).getType());
+                        result.setAmount(pot.result.get(create - 1).getAmount());
+                        if (pot.result.get(create - 1).hasItemMeta()) result.setItemMeta(pot.result.get(create - 1).getItemMeta());
+                    } else {
+                        if (replace >= pot.cancreate) {
+                            if (material.hasItemMeta()) result.setItemMeta(material.getItemMeta());
+                            result.setType(material.getType());
+                            result.setAmount(material.getAmount());
+                            create--;
+                            continue;
+                        }
+                        result.setType(pot.result.get(0).getType());
+                        result.setAmount(pot.result.get(0).getAmount());
+                        if (pot.result.get(0).hasItemMeta()) result.setItemMeta(pot.result.get(0).getItemMeta());
+                    }
+                    replace++;
+                    create--;
+                }
+                ingredient.setAmount(iamo - pot.ingredient.getAmount() + 1);
+                event.getContents().setIngredient(ingredient);
+                return;
             }
-            ingredient.setAmount(iamo - pot.ingredient.getAmount() + 1);
-            event.getContents().setIngredient(ingredient);
-            return;
         }
         ///////////////////////////////////////////////////////
         //  ここからProtect用処理                               //
