@@ -30,12 +30,7 @@ public class GUI {
             }else{
                 list = recipe.get(i + 45 * (page - 1));
             }
-            ItemStack item = new ItemStack(list.result.get(0));
-            ItemMeta meta = item.getItemMeta();
-            if (meta.hasLore()) meta.lore().clear();
-            meta.displayName(Component.text(list.name));
-            item.setItemMeta(meta);
-            inv.setItem(i,item);
+            inv.setItem(i,list.result.get(0));
         }
         player.openInventory(inv);
     }

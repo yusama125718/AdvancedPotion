@@ -1,6 +1,7 @@
 package yusama125718.advancedpotion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -104,8 +105,13 @@ public class Event implements Listener{
                     replace++;
                     create--;
                 }
-                ingredient.setAmount(iamo - pot.ingredient.getAmount() + 1);
-                event.getContents().setIngredient(ingredient);
+                ingredient.setAmount(iamo - pot.ingredient.getAmount());
+                Bukkit.getScheduler().runTaskLater(potp, new Runnable() {
+                    @Override
+                    public void run() {
+                        event.getContents().setIngredient(ingredient);
+                    }
+                }, 1);
                 return;
             }
         }
